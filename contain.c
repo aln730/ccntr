@@ -45,14 +45,12 @@
  * cont_args is NULL, and is not part of the command to run in the container.
  */
 void print_container_cmd(char* const cont_args[]) {
-    /*** STUDENT CODE BELOW (q1) ***/
-
-    // Print each argument in cont_args.
-    return;
-
-    /*** STUDENT CODE ABOVE (q1) ***/
-}
-
+    printf("\"%s\"", cont_args[0]);  // first argument
+    for (int i = 1; cont_args[i] != NULL; i++) {
+        printf(" \"%s\"", cont_args[i]);
+    }
+    printf("\n");
+ }
 
 // Flags for the syscall clone3.
 
@@ -229,7 +227,7 @@ int finalize_cont(const struct container *cont) {
     return 0;
 }
 
-static void host_handle_sigint() {
+static void host_handle_sigint(int signo) {
     printf("container interrupted by keyboard\n");
 }
 
