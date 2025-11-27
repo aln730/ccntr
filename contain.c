@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <stdlib.h>
-
+#include <stdio.h>
 #include <linux/sched.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -78,19 +78,15 @@ int clone_to_container(struct container *cont) {
     pid_t cont_pid = -1;
     struct clone_args clone_args = {0};
 
-    /*** STUDENT CODE BELOW (q3, q5, q13) ***/
+    clone_args.exit_signal = SIGCHLD;
 
-    // Initialize the clone_args structure: flags, exit_signal, cgroup.
-    // clone3(2)
-    // CLONE_NAMESPACE_FLAGS
-    return 0;
+    cont_pid = syscall(SYS_clone3, &clone_args, sizeof(clone_args));
+    if (cont_pid < 0){
+	    perror("clone3");
+	    return -1;
+    }
 
-    // Call the clone3 syscall, store the container process PID in cont->pid
-    // both in the parent and in the child.
-    // syscall(2), clone3(2), getpid(2)
-    return 0;
-
-    /*** STUDENT CODE ABOVE (q3, q5, q13) ***/
+    cont->pid = cont_pid;
 
     return cont_pid;
 }
@@ -315,13 +311,7 @@ int contain(struct container cont, char* cont_args[]) {
 
         printf("container started as process %d\n\n", cont_pid);
 
-        /*** STUDENT CODE BELOW (q4) ***/
-
-        // Wait for the container process to terminate.
-        // wait(2)
-        return 0;
-
-        /*** STUDENT CODE ABOVE (q4) ***/
+	wait(&wstatus);
 
         if (WIFEXITED(wstatus))
             printf("\ncontainer process exited normally with code %d\n",
@@ -343,15 +333,7 @@ int contain(struct container cont, char* cont_args[]) {
                     "failed setting up container environment from container");
 
 
-        /*** STUDENT CODE BELOW (q2) ***/
-
-        // Execute the command inside the container, never to return unless it
-        // failed executing it (e.g., command not found).
-        // Note that cont_args is already formatted for use by execvp.
-        // execvp(2)
-        return EXIT_SUCCESS;
-
-        /*** STUDENT CODE ABOVE (q2) ***/
+        execvp(cont_args[0], cont_args);
 
         err(EXIT_FAILURE,
                 "failed running container child process for container \"%s\"",
