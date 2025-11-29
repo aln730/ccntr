@@ -53,13 +53,11 @@ void contfs_set(struct container_fs *fs, const char* hostname,
  * * -1 on error (and print an error message)
  */
 int contfs_make(const struct container_fs *cont_fs, const char* image) {
-    /*** STUDENT CODE BELOW (q10) ***/
 
-    // Create the directories used to mount the container FS.
-    // libcontain: contfs_mkdirs
-    return 0;
-
-    /*** STUDENT CODE ABOVE (q10) ***/
+    if (contfs_mkdirs(cont_fs) < 0){
+	    raise_msg("failed creating container filesys dirs");
+	    return -1;
+    }
 
     if (contfs_mount(cont_fs, image) < 0) {
         if (contfs_rmdirs(cont_fs) < 0)
