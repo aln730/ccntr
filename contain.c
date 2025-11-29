@@ -58,7 +58,7 @@ void print_container_cmd(char* const cont_args[]) {
 
 // Add the flags for each namespace kind, one by one.
 // clone(2)
-#define CLONE_NAMESPACE_FLAGS CLONE_NEWUSER
+#define CLONE_NAMESPACE_FLAGS (CLONE_NEWUSER | CLONE_NEWPID | CLONE_NEWUTS | CLONE_NEWNET | CLONE_NEWNS)
 
 /*** STUDENT CODE ABOVE (q5, q6, q7, q8, q9) ***/
 
@@ -188,13 +188,11 @@ int finalize_host(const struct container *cont) {
  * * -1 on error (and print an error message)
  */
 int finalize_cont(const struct container *cont) {
-    /*** STUDENT CODE BELOW (q6) ***/
 
-    // Set the hostname of the container.
-    // sethostname(2)
-    return 0;
-
-    /*** STUDENT CODE ABOVE (q6) ***/
+	if (sethostname(cont->hostname, strlen(cont->hostname)) < 0){
+		perror("sethostname");
+		return -1;
+	}
 
     /*** STUDENT CODE BELOW (q11) ***/
 
