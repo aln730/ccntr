@@ -249,23 +249,49 @@ int contfs_mount_pseudo_fs(const struct container_fs *cont_fs) {
  * * -1 on error (and print an error message)
  */
 int cgroup_map_root_user(pid_t cont_pid) {
-    // Path to the UID map file.
+
     char uidmap_path[PATH_MAX];
-    snprintf(uidmap_path, PATH_MAX, "/proc/%d/" PROC_UID_MAP, cont_pid);
-    // Stream to the UID map file.
-    FILE *uid_map_file;
-    // User ID to map to root in the container.
-    uid_t uid = getuid();
+    char gidmap_path[PATH_MAX];
+    char setgroups_path[PATH_MAX];
 
-    /*** STUDENT CODE BELOW (q5) ***/
+    snprintf(setgroups_path, PATH_MAX, "/proc/%d/setgroups", cont_pid);
+    FILE *setgroups = fopen(setgroups_path, "w");
+    if (!setgroups) {
+        perror("fopen setgroups");
+        return -1;
+    }
+    if (fprintf(setgroups, "deny") < 0) {
+        perror("write setgroups");
+        fclose(setgroups);
+        return -1;
+    }
+    fclose(setgroups);
 
-    // Map the user ID to root in the container by writing the mapping to the
-    // UID map file of the container process.
-    // user_namespaces(7)
-    // fopen(3), fprintf(3), flose(3)
-    return 0;
+    snprintf(uidmap_path, PATH_MAX, "/proc/%d/uid_map", cont_pid);
+    FILE *uidmap = fopen(uidmap_path, "w");
+    if (!uidmap) {
+        perror("fopen uid_map");
+        return -1;
+    }
+    if (fprintf(uidmap, "0 %d 1\n", getuid()) < 0) {
+        perror("write uid_map");
+        fclose(uidmap);
+        return -1;
+    }
+    fclose(uidmap);
 
-    /*** STUDENT CODE ABOVE (q5) ***/
+    snprintf(gidmap_path, PATH_MAX, "/proc/%d/gid_map", cont_pid);
+    FILE *gidmap = fopen(gidmap_path, "w");
+    if (!gidmap) {
+        perror("fopen gid_map");
+        return -1;
+    }
+    if (fprintf(gidmap, "0 %d 1\n", getgid()) < 0) {
+        perror("write gid_map");
+        fclose(gidmap);
+        return -1;
+    }
+    fclose(gidmap);
 
     return 0;
 }

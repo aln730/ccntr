@@ -58,7 +58,7 @@ void print_container_cmd(char* const cont_args[]) {
 
 // Add the flags for each namespace kind, one by one.
 // clone(2)
-#define CLONE_NAMESPACE_FLAGS 0
+#define CLONE_NAMESPACE_FLAGS CLONE_NEWUSER
 
 /*** STUDENT CODE ABOVE (q5, q6, q7, q8, q9) ***/
 
@@ -79,7 +79,7 @@ int clone_to_container(struct container *cont) {
     struct clone_args clone_args = {0};
 
     clone_args.exit_signal = SIGCHLD;
-
+    clone_args.flags = CLONE_NAMESPACE_FLAGS;
     cont_pid = syscall(SYS_clone3, &clone_args, sizeof(clone_args));
     if (cont_pid < 0){
 	    perror("clone3");
@@ -153,11 +153,11 @@ void cont_wait() {
  * * -1 on error (and print an error message)
  */
 int finalize_host(const struct container *cont) {
-    /*** STUDENT CODE BELOW (q5) ***/
 
-    // Map the root user to the user ID in the container.
-    // libcontain: cgroup_map_root_user (and implement it!)
-    return 0;
+	if (cgroup_map_root_user(cont->pid) < 0){
+		perror("cgroup_map_root_user");
+		return -1;
+	}
 
     /*** STUDENT CODE ABOVE (q5) ***/
 
